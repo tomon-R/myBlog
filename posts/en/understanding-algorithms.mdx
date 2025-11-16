@@ -1,0 +1,181 @@
+---
+title: "Understanding Algorithm Complexity with Big O Notation"
+date: "2024-03-10"
+excerpt: "A comprehensive guide to understanding time and space complexity in algorithms using Big O notation."
+category: "Computer Science"
+tags: ["algorithms", "data-structures", "math"]
+author: "Your Name"
+readTime: "8 min read"
+featured: true
+---
+
+# Understanding Algorithm Complexity with Big O Notation
+
+Algorithm complexity is fundamental to writing efficient code. Let's explore how Big O notation helps us analyze and compare algorithms.
+
+## What is Big O Notation?
+
+Big O notation describes the upper bound of an algorithm's growth rate. It helps us understand how an algorithm's performance scales with input size.
+
+The formal definition: An algorithm is $O(f(n))$ if there exist constants $c > 0$ and $n_0$ such that:
+
+$$
+T(n) \leq c \cdot f(n) \text{ for all } n \geq n_0
+$$
+
+Where $T(n)$ is the actual time complexity and $f(n)$ is the growth function.
+
+## Common Complexity Classes
+
+### O(1) - Constant Time
+
+Operations that take the same time regardless of input size:
+
+```typescript
+function getFirstElement(arr: number[]): number {
+  return arr[0]; // Always one operation
+}
+```
+
+### O(log n) - Logarithmic Time
+
+Algorithms that reduce the problem size by a constant factor each step:
+
+```typescript
+function binarySearch(arr: number[], target: number): number {
+  let left = 0;
+  let right = arr.length - 1;
+
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    if (arr[mid] === target) return mid;
+    if (arr[mid] < target) left = mid + 1;
+    else right = mid - 1;
+  }
+
+  return -1;
+}
+```
+
+The number of operations is proportional to $\log_2 n$ because we halve the search space each iteration.
+
+### O(n) - Linear Time
+
+Algorithms that examine each element once:
+
+```typescript
+function findMax(arr: number[]): number {
+  let max = arr[0];
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i] > max) max = arr[i];
+  }
+  return max;
+}
+```
+
+### O(n log n) - Linearithmic Time
+
+Efficient sorting algorithms like merge sort and quick sort:
+
+```typescript
+function mergeSort(arr: number[]): number[] {
+  if (arr.length <= 1) return arr;
+
+  const mid = Math.floor(arr.length / 2);
+  const left = mergeSort(arr.slice(0, mid));
+  const right = mergeSort(arr.slice(mid));
+
+  return merge(left, right);
+}
+```
+
+The complexity comes from dividing the array $\log n$ times and merging $n$ elements at each level:
+
+$$
+T(n) = 2T(n/2) + O(n) = O(n \log n)
+$$
+
+### O(n²) - Quadratic Time
+
+Nested loops over the input:
+
+```typescript
+function bubbleSort(arr: number[]): number[] {
+  const n = arr.length;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n - i - 1; j++) {
+      if (arr[j] > arr[j + 1]) {
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+      }
+    }
+  }
+  return arr;
+}
+```
+
+## Space Complexity
+
+Space complexity measures memory usage. Consider this recursive Fibonacci:
+
+```typescript
+function fibonacci(n: number): number {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
+```
+
+- **Time Complexity**: $O(2^n)$ - exponential growth
+- **Space Complexity**: $O(n)$ - recursion stack depth
+
+We can improve this with dynamic programming:
+
+```typescript
+function fibonacciDP(n: number): number {
+  const dp = new Array(n + 1);
+  dp[0] = 0;
+  dp[1] = 1;
+
+  for (let i = 2; i <= n; i++) {
+    dp[i] = dp[i - 1] + dp[i - 2];
+  }
+
+  return dp[n];
+}
+```
+
+- **Time Complexity**: $O(n)$ - single loop
+- **Space Complexity**: $O(n)$ - array storage
+
+## Master Theorem
+
+For recurrence relations of the form:
+
+$$
+T(n) = aT(n/b) + f(n)
+$$
+
+Where $a \geq 1$, $b > 1$, and $f(n)$ is asymptotically positive.
+
+**Three cases:**
+
+1. If $f(n) = O(n^{\log_b a - \epsilon})$ for some $\epsilon > 0$: $T(n) = \Theta(n^{\log_b a})$
+2. If $f(n) = \Theta(n^{\log_b a})$: $T(n) = \Theta(n^{\log_b a} \log n)$
+3. If $f(n) = \Omega(n^{\log_b a + \epsilon})$ for some $\epsilon > 0$: $T(n) = \Theta(f(n))$
+
+## Practical Tips
+
+1. **Focus on worst case**: Big O typically describes worst-case scenarios
+2. **Drop constants**: $O(2n)$ simplifies to $O(n)$
+3. **Keep dominant terms**: $O(n^2 + n)$ simplifies to $O(n^2)$
+4. **Consider trade-offs**: Sometimes $O(n)$ space can reduce time from $O(n^2)$ to $O(n)$
+
+## Conclusion
+
+Understanding Big O notation is essential for writing efficient code. It helps you:
+
+- Choose the right data structures
+- Optimize critical code paths
+- Make informed architectural decisions
+- Communicate complexity to other developers
+
+Remember: premature optimization is the root of all evil, but understanding complexity helps you make better initial choices!

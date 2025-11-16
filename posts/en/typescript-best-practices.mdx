@@ -1,0 +1,302 @@
+---
+title: "TypeScript Best Practices in 2024"
+date: "2024-03-05"
+excerpt: "Learn the most effective TypeScript patterns and practices to write safer, more maintainable code."
+category: "TypeScript"
+tags: ["typescript", "javascript", "best-practices"]
+author: "Your Name"
+readTime: "6 min read"
+featured: true
+---
+
+# TypeScript Best Practices in 2024
+
+TypeScript has become the go-to language for building robust JavaScript applications. Let's explore the best practices that will help you write better TypeScript code.
+
+## 1. Use Strict Mode
+
+Always enable strict mode in your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true
+  }
+}
+```
+
+This enables all strict type-checking options and catches potential bugs early.
+
+## 2. Prefer Type Inference
+
+Let TypeScript infer types when possible:
+
+```typescript
+// ❌ Redundant type annotation
+const message: string = "Hello";
+
+// ✅ Type inference
+const message = "Hello";
+
+// ✅ Useful type annotation
+const messages: string[] = [];
+```
+
+## 3. Use Unknown Instead of Any
+
+The `unknown` type is safer than `any`:
+
+```typescript
+// ❌ Unsafe
+function processValue(value: any) {
+  return value.toUpperCase(); // No type checking
+}
+
+// ✅ Type-safe
+function processValue(value: unknown) {
+  if (typeof value === "string") {
+    return value.toUpperCase();
+  }
+  throw new Error("Value must be a string");
+}
+```
+
+## 4. Leverage Union Types
+
+Union types make your code more expressive:
+
+```typescript
+type Status = "idle" | "loading" | "success" | "error";
+
+interface State {
+  status: Status;
+  data?: string;
+  error?: Error;
+}
+
+function handleState(state: State) {
+  switch (state.status) {
+    case "idle":
+      return "Waiting to start...";
+    case "loading":
+      return "Loading...";
+    case "success":
+      return `Data: ${state.data}`;
+    case "error":
+      return `Error: ${state.error?.message}`;
+  }
+}
+```
+
+## 5. Use Discriminated Unions
+
+Discriminated unions provide excellent type narrowing:
+
+```typescript
+type Result<T, E> =
+  | { success: true; value: T }
+  | { success: false; error: E };
+
+function processResult<T, E>(result: Result<T, E>) {
+  if (result.success) {
+    // TypeScript knows result.value exists here
+    console.log(result.value);
+  } else {
+    // TypeScript knows result.error exists here
+    console.error(result.error);
+  }
+}
+```
+
+## 6. Create Reusable Utility Types
+
+Build a toolkit of utility types:
+
+```typescript
+// Make all properties optional recursively
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
+
+// Pick properties by value type
+type PickByType<T, U> = {
+  [P in keyof T as T[P] extends U ? P : never]: T[P];
+};
+
+// Usage
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  age: number;
+}
+
+type StringProps = PickByType<User, string>;
+// Result: { name: string; email: string }
+```
+
+## 7. Use Const Assertions
+
+Const assertions create readonly, literal types:
+
+```typescript
+// ❌ Mutable, widened types
+const config = {
+  apiUrl: "https://api.example.com",
+  timeout: 5000,
+};
+// Type: { apiUrl: string; timeout: number }
+
+// ✅ Readonly, literal types
+const config = {
+  apiUrl: "https://api.example.com",
+  timeout: 5000,
+} as const;
+// Type: { readonly apiUrl: "https://api.example.com"; readonly timeout: 5000 }
+```
+
+## 8. Properly Type React Components
+
+Use proper types for React components:
+
+```typescript
+import { ReactNode } from "react";
+
+// ✅ Props interface
+interface ButtonProps {
+  children: ReactNode;
+  onClick: () => void;
+  variant?: "primary" | "secondary";
+  disabled?: boolean;
+}
+
+// ✅ Typed component
+export function Button({
+  children,
+  onClick,
+  variant = "primary",
+  disabled = false,
+}: ButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`btn btn-${variant}`}
+    >
+      {children}
+    </button>
+  );
+}
+```
+
+## 9. Use Template Literal Types
+
+Create precise string types:
+
+```typescript
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+type Route = "/users" | "/posts" | "/comments";
+
+type Endpoint = `${HttpMethod} ${Route}`;
+// "GET /users" | "GET /posts" | ... | "DELETE /comments"
+
+function request(endpoint: Endpoint, body?: unknown) {
+  const [method, route] = endpoint.split(" ");
+  // Implementation
+}
+
+request("GET /users"); // ✅ Valid
+request("PATCH /users"); // ❌ Type error
+```
+
+## 10. Handle Errors Properly
+
+Type your error handling:
+
+```typescript
+class AppError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public statusCode: number
+  ) {
+    super(message);
+    this.name = "AppError";
+  }
+}
+
+function handleError(error: unknown): string {
+  if (error instanceof AppError) {
+    return `[${error.code}] ${error.message}`;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "An unknown error occurred";
+}
+```
+
+## 11. Use Branded Types for Type Safety
+
+Create nominal types in a structural type system:
+
+```typescript
+type UserId = string & { readonly __brand: "UserId" };
+type PostId = string & { readonly __brand: "PostId" };
+
+function createUserId(id: string): UserId {
+  return id as UserId;
+}
+
+function createPostId(id: string): PostId {
+  return id as PostId;
+}
+
+function getUser(id: UserId) {
+  // Implementation
+}
+
+const userId = createUserId("user-123");
+const postId = createPostId("post-456");
+
+getUser(userId); // ✅ Valid
+getUser(postId); // ❌ Type error
+```
+
+## 12. Document Complex Types
+
+Use JSDoc comments for better IDE support:
+
+```typescript
+/**
+ * Represents a paginated response from the API
+ * @template T - The type of items in the response
+ */
+interface PaginatedResponse<T> {
+  /** Array of items for the current page */
+  items: T[];
+  /** Current page number (1-indexed) */
+  page: number;
+  /** Total number of pages */
+  totalPages: number;
+  /** Total number of items across all pages */
+  totalItems: number;
+}
+```
+
+## Conclusion
+
+TypeScript best practices evolve as the language grows, but these principles will help you write more maintainable and type-safe code:
+
+1. Enable strict mode
+2. Leverage type inference
+3. Use discriminated unions
+4. Create utility types
+5. Properly type errors
+6. Document complex types
+
+Remember: TypeScript is a tool to help you, not a burden. Use it to make your code more reliable and your development experience better!

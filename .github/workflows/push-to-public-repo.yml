@@ -1,0 +1,103 @@
+name: Push to public repo
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    # Run only inside the private repository
+    if: ${{ github.repository == vars.PRIVATE_REPO_NAME}}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build verification
+        run: npm run build
+
+  push:
+    runs-on: ubuntu-latest
+    needs: lint
+
+    # Run only inside the private repository
+    if: ${{ github.repository == vars.PRIVATE_REPO_NAME}}
+
+    env:
+      PUBLIC_REPO: git@github.com:${{ vars.PUBLIC_REPO_NAME }}.git
+      STAGE: /tmp/pub # Where you copy your working dir to push to
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build sanitized tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$STAGE" && mkdir -p "$STAGE"
+
+          # Copy working tree to stage
+          rsync -a --delete \
+            --exclude '.git/' \
+            ./ "$STAGE/"
+
+          # Drop anything starting with "[PRIVATE]" anywhere
+          find "$STAGE" -type d -name '[[]PRIVATE[]]*' -prune -exec rm -rf {} + || true
+          find "$STAGE" -type f -name '[[]PRIVATE[]]*' -exec rm -f {} + || true
+
+      - name: Use SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.GH_SSH_KEY }}
+
+      - name: Trust github.com host key
+        run: git config --global core.sshCommand "ssh -o StrictHostKeyChecking=accept-new"
+
+      - name: Push to public repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$STAGE"
+
+          git init -b main
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          # Commit only if something changed
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(sync): from private @ ${GITHUB_SHA}"
+          else
+            git commit --allow-empty -m "chore(sync): no changes @ ${GITHUB_SHA}"
+          fi
+
+          git remote add origin "$PUBLIC_REPO"
+
+          # If remote branch exists, rebase to avoid clobbering unrelated history
+          if git ls-remote --heads "$PUBLIC_REPO" main | grep -q 'refs/heads/main'; then
+            git fetch origin main
+            git rebase origin/main || true
+          fi
+
+          git push --force-with-lease -u origin main

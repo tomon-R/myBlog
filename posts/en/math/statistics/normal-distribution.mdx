@@ -1,0 +1,203 @@
+---
+title: "Understanding Normal Distribution"
+date: "2024-03-20"
+excerpt: "A comprehensive guide to the normal distribution, its properties, and applications in statistics and data science."
+category: "Mathematics"
+tags: ["statistics", "math", "probability"]
+author: "Your Name"
+readTime: "10 min read"
+featured: false
+---
+
+# Understanding Normal Distribution
+
+The normal distribution, also known as the Gaussian distribution, is one of the most important probability distributions in statistics. It appears naturally in many real-world phenomena and forms the foundation of many statistical methods.
+
+## The Normal Distribution Formula
+
+The probability density function (PDF) of a normal distribution is given by:
+
+$$
+f(x) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}
+$$
+
+Where:
+- $\mu$ is the mean (center of the distribution)
+- $\sigma$ is the standard deviation (spread of the distribution)
+- $\sigma^2$ is the variance
+
+## Key Properties
+
+### 1. Symmetry
+
+The normal distribution is perfectly symmetric around its mean $\mu$. This means:
+
+$$
+P(X < \mu - a) = P(X > \mu + a)
+$$
+
+For any value $a > 0$.
+
+### 2. 68-95-99.7 Rule
+
+This empirical rule states that:
+- Approximately **68%** of values fall within $\mu \pm \sigma$
+- Approximately **95%** of values fall within $\mu \pm 2\sigma$
+- Approximately **99.7%** of values fall within $\mu \pm 3\sigma$
+
+### 3. Standard Normal Distribution
+
+When $\mu = 0$ and $\sigma = 1$, we have the **standard normal distribution** with PDF:
+
+$$
+\phi(z) = \frac{1}{\sqrt{2\pi}} e^{-\frac{z^2}{2}}
+$$
+
+## Z-Score Transformation
+
+Any normal distribution can be standardized using the z-score transformation:
+
+$$
+Z = \frac{X - \mu}{\sigma}
+$$
+
+This converts any normal random variable to a standard normal random variable.
+
+## Central Limit Theorem
+
+The normal distribution's importance comes from the **Central Limit Theorem**, which states:
+
+> The sum (or average) of a large number of independent random variables tends toward a normal distribution, regardless of the original distribution.
+
+Mathematically, if $X_1, X_2, ..., X_n$ are independent random variables with mean $\mu$ and variance $\sigma^2$, then:
+
+$$
+\bar{X} = \frac{1}{n}\sum_{i=1}^{n} X_i
+$$
+
+approaches a normal distribution as $n \to \infty$:
+
+$$
+\bar{X} \sim N\left(\mu, \frac{\sigma^2}{n}\right)
+$$
+
+## Applications in Statistics
+
+### Hypothesis Testing
+
+Many statistical tests assume normal distribution:
+
+```python
+from scipy import stats
+import numpy as np
+
+# Generate sample data
+data = np.random.normal(loc=100, scale=15, size=1000)
+
+# Perform one-sample t-test
+t_statistic, p_value = stats.ttest_1samp(data, 100)
+
+print(f"t-statistic: {t_statistic:.4f}")
+print(f"p-value: {p_value:.4f}")
+```
+
+### Confidence Intervals
+
+For a sample mean, the 95% confidence interval is:
+
+$$
+\bar{x} \pm 1.96 \frac{\sigma}{\sqrt{n}}
+$$
+
+### Linear Regression
+
+In linear regression, we assume that residuals follow a normal distribution:
+
+```python
+from sklearn.linear_model import LinearRegression
+import numpy as np
+
+# Generate data
+X = np.random.rand(100, 1) * 10
+y = 2 * X.squeeze() + 3 + np.random.normal(0, 2, 100)
+
+# Fit model
+model = LinearRegression()
+model.fit(X, y)
+
+print(f"Coefficient: {model.coef_[0]:.2f}")
+print(f"Intercept: {model.intercept_:.2f}")
+```
+
+## Testing for Normality
+
+### Shapiro-Wilk Test
+
+```python
+from scipy import stats
+
+# Test if data is normally distributed
+statistic, p_value = stats.shapiro(data)
+
+if p_value > 0.05:
+    print("Data appears to be normally distributed")
+else:
+    print("Data does not appear to be normally distributed")
+```
+
+### Q-Q Plot
+
+A quantile-quantile plot compares the quantiles of your data to the quantiles of a normal distribution:
+
+```python
+import scipy.stats as stats
+import matplotlib.pyplot as plt
+
+# Create Q-Q plot
+stats.probplot(data, dist="norm", plot=plt)
+plt.title("Q-Q Plot")
+plt.show()
+```
+
+## Common Misconceptions
+
+1. **Not all data is normal**: Many real-world distributions are skewed or have heavy tails
+2. **Sample size matters**: Small samples may not appear normal even if the population is
+3. **Outliers affect normality**: Extreme values can violate normality assumptions
+
+## The Log-Normal Distribution
+
+When $\log(X)$ follows a normal distribution, $X$ follows a **log-normal distribution**:
+
+$$
+f(x) = \frac{1}{x\sigma\sqrt{2\pi}} e^{-\frac{(\ln x - \mu)^2}{2\sigma^2}}
+$$
+
+This is useful for modeling positive-valued data like stock prices or income distributions.
+
+## Maximum Likelihood Estimation
+
+Given a sample $x_1, x_2, ..., x_n$ from a normal distribution, the maximum likelihood estimates are:
+
+$$
+\hat{\mu} = \frac{1}{n}\sum_{i=1}^{n} x_i = \bar{x}
+$$
+
+$$
+\hat{\sigma}^2 = \frac{1}{n}\sum_{i=1}^{n} (x_i - \bar{x})^2
+$$
+
+## Conclusion
+
+The normal distribution is fundamental to statistics and data science. Understanding its properties, applications, and limitations is crucial for anyone working with data. While many statistical methods assume normality, it's important to:
+
+- Test your data for normality
+- Understand when violations matter
+- Know alternative methods for non-normal data
+- Remember that the Central Limit Theorem often saves the day!
+
+## Further Reading
+
+- "The Normal Distribution" in *Statistical Inference* by Casella & Berger
+- "Understanding Statistics" by Freedman, Pisani, and Purves
+- Khan Academy's course on Normal Distributions
