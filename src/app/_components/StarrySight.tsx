@@ -1,6 +1,6 @@
 "use client";
 
-import { type ColorToken } from "@/lib/color";
+import { type ThemeKey } from "@/hooks/theme";
 import { useAnimationFrame, useMotionValue } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import Star from "./Star";
@@ -13,7 +13,7 @@ interface StarrySightProps {
   coefficientOfRadiousVariation?: number;
   coefficientOfSizeVariation?: number;
   correctionFactor?: number;
-  starColor?: ColorToken;
+  starThemeKey?: ThemeKey;
 }
 
 export default function StarrySight({
@@ -24,7 +24,7 @@ export default function StarrySight({
   coefficientOfRadiousVariation = 0.3,
   coefficientOfSizeVariation = 0.3,
   correctionFactor = 1.3,
-  starColor,
+  starThemeKey,
 }: StarrySightProps) {
   const [windowWidth, setWindowWidth] = useState(1024);
   const radian = useMotionValue(0);
@@ -89,7 +89,7 @@ export default function StarrySight({
             centerY={orbitRadius}
             radius={starRadius}
             size={size}
-            color={starColor}
+            themeKey={starThemeKey}
           />
         );
       })}

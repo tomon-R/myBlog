@@ -1,5 +1,5 @@
 {
-  "directory": ["./src/domain", "./src/lib"],
+  "directory": ["./src/domain", "./src/lib", "./src/hooks"],
   "location": "all",
   "local": true,
   "delete": true,

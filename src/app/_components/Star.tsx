@@ -1,6 +1,6 @@
 "use client";
 
-import { resolveColor, type ColorToken } from "@/lib/color";
+import { useTheme, type ThemeKey } from "@/hooks/theme";
 import { motion, MotionValue, useTransform } from "framer-motion";
 
 interface StarProps {
@@ -13,7 +13,7 @@ interface StarProps {
   centerY?: number;
   radius: number;
   size: number;
-  color?: ColorToken;
+  themeKey?: ThemeKey;
 }
 
 export default function Star({
@@ -25,8 +25,9 @@ export default function Star({
   centerY = 0,
   radius,
   size,
-  color = "star",
+  themeKey = "star",
 }: StarProps) {
+  const [theme] = useTheme();
   const range = maxRadian - minRadian;
 
   const x = useTransform(radian, (r) => {
@@ -50,7 +51,7 @@ export default function Star({
         height={size}
         viewBox="0 0 24 24"
         fill="none"
-        style={{ filter: "blur(6px)", color: resolveColor(color) }}
+        style={{ filter: "blur(6px)", color: theme[themeKey] }}
       >
         {/* ダイヤの形状 */}
         <path

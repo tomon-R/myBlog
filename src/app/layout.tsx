@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { ThemeProvider } from "@/components/themeProvider/ThemeProvider";
 import { config } from "@/lib/config";
 
 import { ibmPlexSansJP, rajdhani } from "@/components/typography/fonts";
